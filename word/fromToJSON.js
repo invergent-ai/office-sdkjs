@@ -5037,7 +5037,7 @@
 				}
 				else if (oItem.Type == para_Text)
 				{
-					aResult.push(String.fromCharCode(oItem.Value));
+					aResult.push(oItem.ToString());
 				}
 			}
 
@@ -5130,7 +5130,7 @@
 				}
 				case para_Text:
 				{
-					sTempRunText += String.fromCharCode(Item.Value);
+					sTempRunText += Item.ToString();
 					break;
 				}
 				case para_Math_BreakOperator:
