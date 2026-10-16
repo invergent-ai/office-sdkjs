@@ -3751,7 +3751,13 @@ var CPresentation = CPresentation || function(){};
         let res = this.DoAction(function() {
             let oViewer     = editor.getDocumentRenderer();
             let pageObject  = oViewer.getPageByCoords(AscCommon.global_mouseEvent.X, AscCommon.global_mouseEvent.Y);
-            let nPage       = pageObject ? pageObject.index : this.GetCurPage();
+            // A selection's anchor belongs to the comment box it opened. The comments panel's "Add Comment to Document"
+            // opens none, so an anchor met there was left by a cancelled box. An anchor whose page is gone is dropped too.
+            let oAnchorPage = this.anchorPositionToAdd && this.anchorPositionToAdd.pageInfo;
+            let nAnchorPage = oAnchorPage ? oAnchorPage.GetIndex() : -1;
+            if (oAnchorPage && (nAnchorPage == -1 || (AscCommentData.asc_getDocumentFlag && AscCommentData.asc_getDocumentFlag())))
+                this.anchorPositionToAdd = null;
+            let nPage       = this.anchorPositionToAdd && oAnchorPage ? nAnchorPage : (pageObject ? pageObject.index : this.GetCurPage());
             let posToAdd    = this.anchorPositionToAdd ? this.anchorPositionToAdd : {x: 10, y: 10};
             let _t          = this;
             let needCorrectPos = this.anchorPositionToAdd ? false : true;

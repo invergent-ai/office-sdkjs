@@ -4603,6 +4603,28 @@
 		let nCommentHeight	= 20;
 		let oDoc			= oViewer.getPDFDoc();
 
+		// A comment on selected text goes beside the selection. The mouse is no guide: on the way to the toolbar's
+		// Add Comment it last crossed the page at the page's top edge. The page is kept as itself, not its index, so a
+		// page a co-editor inserts, moves or deletes while the comment box is open cannot misplace the note.
+		let aSelQuads = oDoc.mouseDownAnnot ? [] : oViewer.file.getSelectionQuads();
+		if (aSelQuads.length) {
+			let nSelPage = aSelQuads[0].page;
+			let nRight = -Infinity, nTop = Infinity;
+			aSelQuads[0].quads.forEach(function(quad) {
+				for (let i = 0; i < quad.length; i += 2) {
+					nRight = Math.max(nRight, quad[i]);
+					nTop = Math.min(nTop, quad[i + 1]);
+				}
+			});
+			oDoc.anchorPositionToAdd = {
+				x: Math.max(0, Math.min(nRight, oViewer.file.pages[nSelPage].W - nCommentWidth)),
+				y: Math.max(0, Math.min(nTop, oViewer.file.pages[nSelPage].H - nCommentHeight)),
+				pageInfo: oDoc.GetPageInfo(nSelPage)
+			};
+			let oSelPos = AscPDF.GetGlobalCoordsByPageCoords(oDoc.anchorPositionToAdd.x, oDoc.anchorPositionToAdd.y, nSelPage);
+			return new AscCommon.asc_CRect(oSelPos["X"], oSelPos["Y"], 0, 0);
+		}
+
 		let oBasePos = {
 			x: 10,
 			y: 10
