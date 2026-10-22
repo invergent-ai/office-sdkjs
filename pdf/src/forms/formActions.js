@@ -737,93 +737,61 @@
         memory.WriteString(this.script);
     };
 	
-    function EvalScript(str, oParentDoc, oEvent) {
-        let aArgsNamesToDelete = [
-            "window",
-            "setTimeout",
-            "setInterval",
-            "XMLHttpRequest",
-            "Promise",
-            "console"
-        ];
-    
-        let oApiConsole = {
-            "println": function(value) {
-                console.log(value);
-            },
-            "clear": function() {
-                console.clear();
-            },
-            "hide": function() {
-                return false;
-            },
-            "show": function() {
-                return false;
-            }
-        };
-        Object.freeze(oApiConsole);
-    
-        let oApiObjects = AscPDF.Api.Types;
-        let aArgsNamesPdfApi = [
-            "event",
-            "color",
+	function EvalScript(str, oParentDoc, oEvent) {
+		// push first so it stays balanced with the caller's `oDoc.event = eventsStack.pop()`
+		oParentDoc.eventsStack.push(oParentDoc.event);
+		oParentDoc.event = oEvent;
 
-            "AFNumber_Format",
-            "AFNumber_Keystroke",
-            "AFPercent_Format",
-            "AFPercent_Keystroke",
-            "AFDate_Format",
-            "AFDate_Keystroke",
-            "AFDate_FormatEx",
-            "AFDate_KeystrokeEx",
-            "AFTime_Format",
-            "AFTime_Keystroke",
-            "AFTime_FormatEx",
-            "AFTime_KeystrokeEx",
-            "AFSpecial_Format",
-            "AFSpecial_Keystroke",
-            "AFSpecial_KeystrokeEx",
-            "AFSimple_Calculate",
-            "AFRange_Validate",
-        ];
-    
-        if (!oParentDoc.globalEventStack) {
-            oParentDoc.globalEventStack = [];    
-        }
+		let oApiConsole = {
+			"println": function(value) {
+				console.log(value);
+			},
+			"clear": function() {
+				console.clear();
+			},
+			"hide": function() {
+				return false;
+			},
+			"show": function() {
+				return false;
+			}
+		};
+		Object.freeze(oApiConsole);
 
-        oParentDoc.globalEventStack.push(oParentDoc.event);
-        oParentDoc.event = oEvent;
+		let oApiObjects = AscPDF.Api.Types;
+		let oApiFunc    = AscPDF.Api.Functions;
 
-        let oApiFunc = AscPDF.Api.Functions;
-        let aArgsPdfApi = [
-            oEvent,
-            oApiObjects["color"],
+		let oParams = {
+			"console": oApiConsole,
+			"event":   oEvent,
+			"color":   oApiObjects["color"],
 
-            oApiFunc["AFNumber_Format"],
-            oApiFunc["AFNumber_Keystroke"],
-            oApiFunc["AFPercent_Format"],
-            oApiFunc["AFPercent_Keystroke"],
-            oApiFunc["AFDate_Format"],
-            oApiFunc["AFDate_Keystroke"],
-            oApiFunc["AFDate_FormatEx"],
-            oApiFunc["AFDate_KeystrokeEx"],
-            oApiFunc["AFTime_Format"],
-            oApiFunc["AFTime_Keystroke"],
-            oApiFunc["AFTime_FormatEx"],
-            oApiFunc["AFTime_KeystrokeEx"],
-            oApiFunc["AFSpecial_Format"],
-            oApiFunc["AFSpecial_Keystroke"],
-            oApiFunc["AFSpecial_KeystrokeEx"],
-            oApiFunc["AFSimple_Calculate"],
-            oApiFunc["AFRange_Validate"]
-        ];
-    
-        let funcArgs = aArgsNamesToDelete.concat(aArgsNamesPdfApi);
-        funcArgs.push(str);
-    
-        let func = Function.apply(null, funcArgs);
-        func.bind(oParentDoc.GetDocumentApi()).apply(null, new Array(aArgsNamesToDelete.length - 1).concat(oApiConsole, aArgsPdfApi));
-    }
+			"AFNumber_Format":       oApiFunc["AFNumber_Format"],
+			"AFNumber_Keystroke":    oApiFunc["AFNumber_Keystroke"],
+			"AFPercent_Format":      oApiFunc["AFPercent_Format"],
+			"AFPercent_Keystroke":   oApiFunc["AFPercent_Keystroke"],
+			"AFDate_Format":         oApiFunc["AFDate_Format"],
+			"AFDate_Keystroke":      oApiFunc["AFDate_Keystroke"],
+			"AFDate_FormatEx":       oApiFunc["AFDate_FormatEx"],
+			"AFDate_KeystrokeEx":    oApiFunc["AFDate_KeystrokeEx"],
+			"AFTime_Format":         oApiFunc["AFTime_Format"],
+			"AFTime_Keystroke":      oApiFunc["AFTime_Keystroke"],
+			"AFTime_FormatEx":       oApiFunc["AFTime_FormatEx"],
+			"AFTime_KeystrokeEx":    oApiFunc["AFTime_KeystrokeEx"],
+			"AFSpecial_Format":      oApiFunc["AFSpecial_Format"],
+			"AFSpecial_Keystroke":   oApiFunc["AFSpecial_Keystroke"],
+			"AFSpecial_KeystrokeEx": oApiFunc["AFSpecial_KeystrokeEx"],
+			"AFSimple_Calculate":    oApiFunc["AFSimple_Calculate"],
+			"AFRange_Validate":      oApiFunc["AFRange_Validate"],
+
+			// extra shadows on top of the shared base deny-map
+			"AscDesktopEditor":      undefined,
+			"Promise":               undefined
+		};
+
+		// thisArg = the document API preserves Acrobat's `this === Doc` for the top-level script
+		AscCommon.secureEval(str, oParams, oParentDoc.GetDocumentApi());
+	}
     
 
     if (!window["AscPDF"])
