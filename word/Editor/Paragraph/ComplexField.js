@@ -534,7 +534,7 @@ ParaInstrText.prototype.GetRun = function()
 };
 ParaInstrText.prototype.GetValue = function()
 {
-	return String.fromCharCode(this.Value);
+	return this.ToString();
 };
 ParaInstrText.prototype.GetCodePoint = function()
 {

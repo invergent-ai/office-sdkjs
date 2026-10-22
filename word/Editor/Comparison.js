@@ -1971,7 +1971,7 @@
         {
             if(this.elements[i] instanceof AscWord.CRunText)
             {
-                sResultString += String.fromCharCode(this.elements[i].GetCodePoint());
+                sResultString += this.elements[i].ToString();
             }
             else if(this.elements[i] instanceof AscWord.CRunSpace)
             {
