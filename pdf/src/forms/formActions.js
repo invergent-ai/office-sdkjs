@@ -790,7 +790,7 @@
 		};
 
 		// thisArg = the document API preserves Acrobat's `this === Doc` for the top-level script
-		AscCommon.secureEval(str, oParams, oParentDoc.GetDocumentApi());
+		AscCommon.secureEval(str, oParams, oParentDoc.GetDocumentApi(), true);
 	}
     
 
