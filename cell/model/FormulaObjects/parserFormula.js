@@ -11883,7 +11883,9 @@ function parserFormula( formula, parent, _ws ) {
 				if (!oIndexNumValue) {
 					oIndexNumValue = this.getOutStackElem(nIndexNumId);
 				}
-				if (oIndexNumValue.type === cElementType.func || oIndexNumValue.type === cElementType.operator) {
+				// the offsets above assume one token per argument: a function call in range_lookup leaves its
+				// argument count there, so the arguments are known only after the calculation
+				if ("object" !== typeof oIndexNumValue || oIndexNumValue.type === cElementType.func || oIndexNumValue.type === cElementType.operator) {
 					g_cCalcRecursion.setRecheckFormula(true);
 					g_cCalcRecursion.addRecheckingFormulaData('parserFormula', this);
 					g_cCalcRecursion.addRecheckingFormulaData('formulaName', oOutStackElem.name);
